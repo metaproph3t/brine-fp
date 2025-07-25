@@ -436,7 +436,7 @@ mod tests {
     #[test]
     fn test_frexp_large_value() {
         let val = UnsignedNumeric {
-            value: InnerUint([0, 0, 1]), // 2^128 scaled fixed-point
+            value: InnerUint([0, 0, 1, 0]), // 2^128 scaled fixed-point
         };
         let (frac, exp) = val.frexp().unwrap();
         let recombined = frexp_recombine(frac.clone(), exp);

@@ -102,13 +102,13 @@ impl UnsignedNumeric {
     /// Layout is little-endian: `[lo, mid, hi]` = `lo + (mid << 64) + (hi << 128)`.
     pub fn from_values(lo: u64, mid: u64, hi: u64) -> Self {
         Self {
-            value: InnerUint([lo, mid, hi]),
+            value: InnerUint([lo, mid, hi, 0]),
         }
     }
 
     /// Converts this `UnsignedNumeric` into a raw `[u8; 24]` representation.
     pub fn to_bytes(&self) -> [u8; 24] {
-        let InnerUint([lo, mid, hi]) = self.value;
+        let InnerUint([lo, mid, hi, _]) = self.value;
 
         let mut bytes = [0u8; 24];
         bytes[0..8].copy_from_slice(&lo.to_le_bytes());
@@ -125,7 +125,7 @@ impl UnsignedNumeric {
         let hi = u64::from_le_bytes(bytes[16..24].try_into().unwrap());
 
         Self {
-            value: InnerUint([lo, mid, hi]),
+            value: InnerUint([lo, mid, hi, 0]),
         }
     }
 
@@ -479,7 +479,7 @@ mod tests {
     #[test]
     fn test_mul_large_by_large_overflow() {
         let a = UnsignedNumeric {
-            value: InnerUint([0, 0, 1]), // 2^128
+            value: InnerUint([0, 0, 1, 0]), // 2^128
         };
         let b = a.clone(); // 2^128 * 2^128 = 2^256, definitely too large
 

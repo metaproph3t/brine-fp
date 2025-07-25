@@ -9,7 +9,7 @@
 use uint::construct_uint;
 
 construct_uint! {
-    pub struct InnerUint(3);
+    pub struct InnerUint(4);
 }
 
 pub mod consts;
