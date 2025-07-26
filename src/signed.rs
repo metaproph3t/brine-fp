@@ -1,6 +1,6 @@
 use super::unsigned::UnsignedNumeric;
 use core::cmp::PartialOrd;
-use core::ops::{Add, Sub, Mul, Div};
+use core::ops::{Add, Sub, Mul, Div, Neg};
 
 // Based on the following implementations:
 // https://github.com/solana-labs/solana-program-library/blob/v2.0/libraries/math/src/precise_number.rs
@@ -272,6 +272,22 @@ impl Div<&SignedNumeric> for &SignedNumeric {
 
     fn div(self, rhs: &SignedNumeric) -> Self::Output {
         self.checked_div(rhs).unwrap()
+    }
+}
+
+impl Neg for SignedNumeric {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        self.negate()
+    }
+}
+
+impl Neg for &SignedNumeric {
+    type Output = SignedNumeric;
+
+    fn neg(self) -> Self::Output {
+        self.negate()
     }
 }
 
@@ -706,5 +722,36 @@ mod tests {
         assert!(5u64 != b);
         assert!(c != 5u64);  // -5 != 5
         assert!(5u64 != c);
+    }
+
+    #[test]
+    fn test_neg_trait() {
+        let a = signed(5, false);  // 5
+        let b = signed(3, true);   // -3
+        
+        // Test negating positive number
+        let neg_a = -a.clone();
+        assert_eq!(neg_a.value, a.value);
+        assert!(neg_a.is_negative);
+        
+        // Test negating negative number
+        let neg_b = -b.clone();
+        assert_eq!(neg_b.value, b.value);
+        assert!(!neg_b.is_negative);
+        
+        // Test double negation
+        let double_neg_a = -(-a.clone());
+        assert_eq!(double_neg_a.value, a.value);
+        assert!(!double_neg_a.is_negative);
+        assert_eq!(double_neg_a, a);
+        
+        // Test with references
+        let neg_a_ref = -&a;
+        assert_eq!(neg_a_ref.value, a.value);
+        assert!(neg_a_ref.is_negative);
+        
+        let neg_b_ref = -&b;
+        assert_eq!(neg_b_ref.value, b.value);
+        assert!(!neg_b_ref.is_negative);
     }
 }
