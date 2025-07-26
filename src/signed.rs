@@ -77,7 +77,7 @@ impl SignedNumeric {
                 is_negative: true,
             })
         } else if rhs_negative {
-            if rhs.value.greater_than(&self.value) {
+            if rhs.value > self.value {
                 Some(Self {
                     value: rhs.value.checked_sub(&self.value)?,
                     is_negative: true,
@@ -89,7 +89,7 @@ impl SignedNumeric {
                 })
             }
         } else if lhs_negative {
-            if self.value.greater_than(&rhs.value) {
+            if self.value > rhs.value {
                 Some(Self {
                     value: self.value.checked_sub(&rhs.value)?,
                     is_negative: true,

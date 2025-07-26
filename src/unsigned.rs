@@ -2,6 +2,7 @@ use super::consts::*;
 use super::signed::SignedNumeric;
 use super::InnerUint;
 use core::convert::*;
+use core::cmp::PartialOrd;
 use core::ops::{Add, Sub, Mul, Div};
 
 // Based on the following implementations:
@@ -233,25 +234,7 @@ impl UnsignedNumeric {
         difference.value < precision
     }
 
-    /// Returns `true` if `self < rhs` in fixed-point terms.
-    pub fn less_than(&self, rhs: &Self) -> bool {
-        self.value < rhs.value
-    }
 
-    /// Returns `true` if `self > rhs`.
-    pub fn greater_than(&self, rhs: &Self) -> bool {
-        self.value > rhs.value
-    }
-
-    /// Returns `true` if `self <= rhs`.
-    pub fn less_than_or_equal(&self, rhs: &Self) -> bool {
-        self.value <= rhs.value
-    }
-
-    /// Returns `true` if `self >= rhs`.
-    pub fn greater_than_or_equal(&self, rhs: &Self) -> bool {
-        self.value >= rhs.value
-    }
 
     /// Rounds down to the nearest whole number by truncating fractional digits.
     pub fn floor(&self) -> Option<Self> {
@@ -486,6 +469,12 @@ impl Div<&UnsignedNumeric> for &UnsignedNumeric {
     }
 }
 
+impl PartialOrd for UnsignedNumeric {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        Some(self.value.cmp(&other.value))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -603,12 +592,12 @@ mod tests {
     fn test_comparisons() {
         let a = UnsignedNumeric::new(1);
         let b = UnsignedNumeric::new(2);
-        assert!(a.less_than(&b));
-        assert!(b.greater_than(&a));
-        assert!(a.less_than_or_equal(&b));
-        assert!(b.greater_than_or_equal(&a));
-        assert!(a.less_than_or_equal(&a));
-        assert!(a.greater_than_or_equal(&a));
+        assert!(a < b);
+        assert!(b > a);
+        assert!(a <= b);
+        assert!(b >= a);
+        assert!(a <= a);
+        assert!(a >= a);
     }
 
     #[test]

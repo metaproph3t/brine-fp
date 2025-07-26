@@ -92,7 +92,7 @@ impl UnsignedNumeric {
 
         let (f1_init, ki_init) = self.frexp()?;
 
-        let (f1, ki) = if f1_init.less_than(&SQRT2OVERTWO) {
+        let (f1, ki) = if f1_init < SQRT2OVERTWO {
             let new_f1 = f1_init.checked_mul(&TWO_PREC)?;
             let new_k1 = ki_init.checked_sub(1)?;
             (new_f1, new_k1)

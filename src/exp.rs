@@ -82,9 +82,9 @@ impl SignedNumeric {
 
         // argument reduction
         // if |x| > 0.5 ln2
-        if self.value.greater_than(&HALFLN2) {
+        if self.value > HALFLN2 {
             // if |x| >= 1.5 ln2
-            if self.value.greater_than_or_equal(&THREEHALFLN2) {
+            if self.value >= THREEHALFLN2 {
                 k = INVLN2
                     .signed()
                     .checked_mul(self)?
@@ -175,14 +175,14 @@ impl UnsignedNumeric {
     pub fn frexp(&self) -> Option<(Self, i64)> {
         if self.eq(&ZERO_PREC) {
             Some((ZERO_PREC.clone(), 0))
-        } else if self.less_than(&ONE_PREC) {
+        } else if self < &ONE_PREC {
             let first_leading = self.value.0[0].leading_zeros();
             let one_leading = ONE_PREC.value.0[0].leading_zeros();
             let bits = i64::from(first_leading.checked_sub(one_leading).unwrap());
             let frac = UnsignedNumeric {
                 value: self.value << bits,
             };
-            if frac.less_than(&HALF) {
+            if frac < HALF {
                 Some((frac.checked_mul(&TWO_PREC).unwrap(), -bits - 1))
             } else {
                 Some((frac, -bits))
@@ -192,7 +192,7 @@ impl UnsignedNumeric {
             let frac = UnsignedNumeric {
                 value: self.value >> bits,
             };
-            if frac.less_than(&HALF) {
+            if frac < HALF {
                 Some((frac.checked_mul(&TWO_PREC).unwrap(), bits - 1))
             } else {
                 Some((frac, bits))
@@ -424,8 +424,8 @@ mod tests {
             exp,
             recombined.to_string()
         );
-        assert!(frac.greater_than_or_equal(&HALF));
-        assert!(frac.less_than(&ONE_PREC));
+        assert!(frac >= HALF);
+        assert!(frac < ONE_PREC);
     }
 
     #[test]
@@ -441,8 +441,8 @@ mod tests {
             exp,
             recombined.to_string()
         );
-        assert!(frac.greater_than_or_equal(&HALF));
-        assert!(frac.less_than(&ONE_PREC));
+        assert!(frac >= HALF);
+        assert!(frac < ONE_PREC);
     }
 
     #[test]
@@ -461,8 +461,8 @@ mod tests {
             exp,
             recombined.to_string()
         );
-        assert!(frac.greater_than_or_equal(&HALF));
-        assert!(frac.less_than(&ONE_PREC));
+        assert!(frac >= HALF);
+        assert!(frac < ONE_PREC);
     }
 
     #[test]
