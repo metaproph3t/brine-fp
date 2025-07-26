@@ -334,15 +334,15 @@ impl UnsignedNumeric {
     /// For example, a number representing 3.1415 will be displayed as:
     /// `"3.141500000000000000"`
     pub fn to_string(&self) -> String {
-        let whole = self.floor().unwrap().to_imprecise().unwrap();
+        let integer = self.floor().unwrap();
         let decimals = self
-            .checked_sub(&UnsignedNumeric::new(whole))
+            .checked_sub(&integer)
             .unwrap()
             .checked_mul(&UnsignedNumeric::new(ONE))
             .unwrap()
             .to_imprecise()
             .unwrap();
-        format!("{}.{:0>width$}", whole, decimals, width = 18)
+        format!("{}.{:0>width$}", (integer / UnsignedNumeric::new(ONE)).value.to_string(), decimals, width = 18)
     }
 }
 
