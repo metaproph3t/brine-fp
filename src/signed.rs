@@ -276,6 +276,34 @@ impl PartialOrd for SignedNumeric {
     }
 }
 
+impl PartialOrd<u64> for SignedNumeric {
+    fn partial_cmp(&self, other: &u64) -> Option<core::cmp::Ordering> {
+        let other_numeric = SignedNumeric::new(*other as i128);
+        self.partial_cmp(&other_numeric)
+    }
+}
+
+impl PartialOrd<SignedNumeric> for u64 {
+    fn partial_cmp(&self, other: &SignedNumeric) -> Option<core::cmp::Ordering> {
+        let self_numeric = SignedNumeric::new(*self as i128);
+        self_numeric.partial_cmp(other)
+    }
+}
+
+impl PartialEq<u64> for SignedNumeric {
+    fn eq(&self, other: &u64) -> bool {
+        let other_numeric = SignedNumeric::new(*other as i128);
+        self == &other_numeric
+    }
+}
+
+impl PartialEq<SignedNumeric> for u64 {
+    fn eq(&self, other: &SignedNumeric) -> bool {
+        let self_numeric = SignedNumeric::new(*self as i128);
+        &self_numeric == other
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -588,5 +616,43 @@ mod tests {
         assert!(c == c);
         assert!(a != c);
         assert!(a != b);
+    }
+
+    #[test]
+    fn test_u64_comparisons() {
+        let a = signed(5, false);  // 5
+        let b = signed(3, false);  // 3
+        let c = signed(5, true);   // -5
+        let d = signed(3, true);   // -3
+        
+        // Test positive SignedNumeric < u64
+        assert!(b < 5);
+        assert!(a > 3u64);
+        assert!(a >= 5u64);
+        assert!(b <= 5u64);
+        
+        // Test u64 < positive SignedNumeric
+        assert!(3u64 < a);
+        assert!(5u64 > b);
+        assert!(5u64 >= a);
+        assert!(3u64 <= a);
+        
+        // Test negative SignedNumeric < u64
+        assert!(c < 5u64);  // -5 < 5
+        assert!(c < 3u64);  // -5 < 3
+        assert!(d < 5u64);  // -3 < 5
+        
+        // Test u64 > negative SignedNumeric
+        assert!(5u64 > c);  // 5 > -5
+        assert!(3u64 > c);  // 3 > -5
+        assert!(5u64 > d);  // 5 > -3
+        
+        // Test equality
+        assert!(a == 5u64);
+        assert!(5u64 == a);
+        assert!(b != 5u64);
+        assert!(5u64 != b);
+        assert!(c != 5u64);  // -5 != 5
+        assert!(5u64 != c);
     }
 }

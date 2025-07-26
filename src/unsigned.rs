@@ -475,6 +475,34 @@ impl PartialOrd for UnsignedNumeric {
     }
 }
 
+impl PartialOrd<u64> for UnsignedNumeric {
+    fn partial_cmp(&self, other: &u64) -> Option<core::cmp::Ordering> {
+        let other_numeric = UnsignedNumeric::new(*other as u128);
+        self.partial_cmp(&other_numeric)
+    }
+}
+
+impl PartialOrd<UnsignedNumeric> for u64 {
+    fn partial_cmp(&self, other: &UnsignedNumeric) -> Option<core::cmp::Ordering> {
+        let self_numeric = UnsignedNumeric::new(*self as u128);
+        self_numeric.partial_cmp(other)
+    }
+}
+
+impl PartialEq<u64> for UnsignedNumeric {
+    fn eq(&self, other: &u64) -> bool {
+        let other_numeric = UnsignedNumeric::new(*other as u128);
+        self == &other_numeric
+    }
+}
+
+impl PartialEq<UnsignedNumeric> for u64 {
+    fn eq(&self, other: &UnsignedNumeric) -> bool {
+        let self_numeric = UnsignedNumeric::new(*self as u128);
+        &self_numeric == other
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -789,5 +817,29 @@ mod tests {
         let product2 = &a * b.clone();
         assert_eq!(product1.to_imprecise().unwrap(), 12);
         assert_eq!(product2.to_imprecise().unwrap(), 12);
+    }
+
+    #[test]
+    fn test_u64_comparisons() {
+        let a = UnsignedNumeric::new(5);
+        let b = UnsignedNumeric::new(3);
+        
+        // Test UnsignedNumeric < u64
+        assert!(b < 5u64);
+        assert!(a > 3u64);
+        assert!(a >= 5u64);
+        assert!(b <= 5u64);
+        
+        // Test u64 < UnsignedNumeric
+        assert!(3u64 < a);
+        assert!(5u64 > b);
+        assert!(5u64 >= a);
+        assert!(3u64 <= a);
+        
+        // Test equality
+        assert!(a == 5u64);
+        assert!(5u64 == a);
+        assert!(b != 5u64);
+        assert!(5u64 != b);
     }
 }
