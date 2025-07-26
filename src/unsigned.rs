@@ -102,6 +102,12 @@ pub struct UnsignedNumeric {
 }
 
 impl UnsignedNumeric {
+    /// The maximum value that can be represented by this type.
+    /// 
+    /// For the default 192-bit version, this is approximately 2^192 - 1.
+    /// For the 256-bit version, this is approximately 2^256 - 1.
+    pub const MAX: Self = Self { value: super::consts::max_value() };
+
     /// Returns a `UnsignedNumeric` representing 0.0.
     pub fn zero() -> Self {
         Self { value: zero() }
@@ -517,6 +523,21 @@ mod tests {
     fn test_zero_and_one() {
         assert_eq!(UnsignedNumeric::zero().value, InnerUint::from(0));
         assert_eq!(UnsignedNumeric::one().value, InnerUint::from(ONE));
+    }
+
+    #[test]
+    fn test_max() {
+        let max_val = UnsignedNumeric::MAX;
+        // The max value should be the maximum possible InnerUint
+        assert_eq!(max_val.value, InnerUint::max_value());
+        
+        // Adding 1 to max should overflow
+        let one = UnsignedNumeric::one();
+        assert!(max_val.checked_add(&one).is_none());
+        
+        // Max should be greater than any reasonable value
+        let large_val = UnsignedNumeric::new(1_000_000_000_000_000_000u128);
+        assert!(max_val > large_val);
     }
 
     #[test]

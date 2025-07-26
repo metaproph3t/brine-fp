@@ -50,6 +50,19 @@ pub const fn two() -> InnerUint {
     }
 }
 
+/// Returns the maximum value that can be represented by InnerUint.
+#[inline]
+pub const fn max_value() -> InnerUint {
+    #[cfg(feature = "256-bit")]
+    {
+        InnerUint([u64::MAX, u64::MAX, u64::MAX, u64::MAX])
+    }
+    #[cfg(not(feature = "256-bit"))]
+    {
+        InnerUint([u64::MAX, u64::MAX, u64::MAX])
+    }
+}
+
 /// Fixed-point representation of 0.5 (HALF).
 #[inline]
 pub const fn half() -> InnerUint {

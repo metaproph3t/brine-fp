@@ -37,6 +37,26 @@ pub struct SignedNumeric {
 }
 
 impl SignedNumeric {
+    /// The maximum value that can be represented by this type.
+    /// 
+    /// This is the same as `UnsignedNumeric::MAX` but with `is_negative = false`.
+    /// For the default 192-bit version, this is approximately 2^192 - 1.
+    /// For the 256-bit version, this is approximately 2^256 - 1.
+    pub const MAX: Self = Self {
+        value: UnsignedNumeric::MAX,
+        is_negative: false,
+    };
+
+    /// The minimum value that can be represented by this type.
+    /// 
+    /// This is the same as `UnsignedNumeric::MAX` but with `is_negative = true`.
+    /// For the default 192-bit version, this is approximately -(2^192 - 1).
+    /// For the 256-bit version, this is approximately -(2^256 - 1).
+    pub const MIN: Self = Self {
+        value: UnsignedNumeric::MAX,
+        is_negative: true,
+    };
+
     pub fn new(value: i128) -> Self {
         let abs_value = value.unsigned_abs();
         let is_negative = value < 0;
@@ -324,6 +344,38 @@ mod tests {
         assert_eq!(b.value, a.value);
         assert_eq!(b.is_negative, true);
         assert_eq!(b.negate(), a);
+    }
+
+    #[test]
+    fn test_max_and_min() {
+        let max_val = SignedNumeric::MAX;
+        let min_val = SignedNumeric::MIN;
+        
+        // Max should be positive and equal to UnsignedNumeric::MAX
+        assert!(!max_val.is_negative);
+        assert_eq!(max_val.value, UnsignedNumeric::MAX);
+        
+        // Min should be negative and equal to UnsignedNumeric::MAX but negative
+        assert!(min_val.is_negative);
+        assert_eq!(min_val.value, UnsignedNumeric::MAX);
+        
+        // Max should be greater than min
+        assert!(max_val > min_val);
+        
+        // Adding 1 to max should overflow
+        let one = SignedNumeric::new(1);
+        assert!(max_val.checked_add(&one).is_none());
+        
+        // Subtracting 1 from min should overflow
+        assert!(min_val.checked_sub(&one).is_none());
+        
+        // Max should be greater than any reasonable positive value
+        let large_pos = SignedNumeric::new(1_000_000_000_000_000_000);
+        assert!(max_val > large_pos);
+        
+        // Min should be less than any reasonable negative value
+        let large_neg = SignedNumeric::new(-1_000_000_000_000_000_000);
+        assert!(min_val < large_neg);
     }
 
     #[test]
