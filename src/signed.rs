@@ -1,4 +1,5 @@
 use super::unsigned::UnsignedNumeric;
+use core::cmp::PartialOrd;
 use core::ops::{Add, Sub, Mul, Div};
 
 // Based on the following implementations:
@@ -251,6 +252,27 @@ impl Div<&SignedNumeric> for &SignedNumeric {
 
     fn div(self, rhs: &SignedNumeric) -> Self::Output {
         self.checked_div(rhs).unwrap()
+    }
+}
+
+impl PartialOrd for SignedNumeric {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        // Handle the case where one is negative and the other is positive
+        if self.is_negative && !other.is_negative {
+            return Some(core::cmp::Ordering::Less);
+        }
+        if !self.is_negative && other.is_negative {
+            return Some(core::cmp::Ordering::Greater);
+        }
+        
+        // Both have the same sign, so compare magnitudes
+        if self.is_negative {
+            // Both negative: reverse the comparison
+            other.value.partial_cmp(&self.value)
+        } else {
+            // Both positive: normal comparison
+            self.value.partial_cmp(&other.value)
+        }
     }
 }
 
@@ -534,5 +556,37 @@ mod tests {
         let quotient = a.clone() / b.clone();
         assert!(quotient.value.almost_eq(&UnsignedNumeric::from_scaled_u128(1_666_666_666_666_666_666), InnerUint::from(1_000_000)));
         assert!(!quotient.is_negative); // negative / negative = positive
+    }
+
+    #[test]
+    fn test_comparisons() {
+        let a = signed(5, false);  // 5
+        let b = signed(3, false);  // 3
+        let c = signed(5, true);   // -5
+        let d = signed(3, true);   // -3
+        
+        // Test positive comparisons
+        assert!(b < a);
+        assert!(a > b);
+        assert!(a <= a);
+        assert!(a >= a);
+        
+        // Test negative comparisons
+        assert!(c < d);  // -5 < -3
+        assert!(d > c);  // -3 > -5
+        assert!(c <= c);
+        assert!(c >= c);
+        
+        // Test mixed sign comparisons
+        assert!(c < a);  // -5 < 5
+        assert!(a > c);  // 5 > -5
+        assert!(c < b);  // -5 < 3
+        assert!(b > c);  // 3 > -5
+        
+        // Test equality
+        assert!(a == a);
+        assert!(c == c);
+        assert!(a != c);
+        assert!(a != b);
     }
 }
