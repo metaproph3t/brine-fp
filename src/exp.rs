@@ -1,3 +1,5 @@
+use crate::InnerUint;
+
 use super::consts::*;
 use super::unsigned::UnsignedNumeric;
 use super::signed::SignedNumeric;
@@ -188,7 +190,13 @@ impl UnsignedNumeric {
                 Some((frac, -bits))
             }
         } else {
-            let bits = 128_i64.checked_sub(i64::from(self.to_imprecise()?.leading_zeros()))?;
+            #[cfg(not(feature = "256-bit"))]
+            const TOTAL_BITS: i64 = 192;
+
+            #[cfg(feature = "256-bit")]
+            const TOTAL_BITS: i64 = 256;
+
+            let bits = TOTAL_BITS.checked_sub(i64::from(self.to_imprecise_uint().leading_zeros()))?;
             let frac = UnsignedNumeric {
                 value: self.value >> bits,
             };

@@ -216,6 +216,12 @@ impl UnsignedNumeric {
             .map(|v| v.as_u128())
     }
 
+    pub fn to_imprecise_uint(&self) -> InnerUint {
+        self.value
+            .saturating_add(Self::rounding_correction())
+            .div(one())
+    }
+
     /// Converts this `UnsignedNumeric` into a signed version,
     /// wrapping it in a `SignedNumeric` with `is_negative = false`.
     /// Useful when beginning arithmetic that may result in negative values.
