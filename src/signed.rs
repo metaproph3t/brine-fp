@@ -30,7 +30,7 @@ use core::ops::{Add, Sub, Mul, Div, Neg};
 ///
 /// This format is useful for financial and scientific applications where both precision and sign are critical,
 /// and where floating-point inaccuracies are unacceptable.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Copy)]
 pub struct SignedNumeric {
     pub value: UnsignedNumeric,
     pub is_negative: bool,
@@ -753,5 +753,36 @@ mod tests {
         let neg_b_ref = -&b;
         assert_eq!(neg_b_ref.value, b.value);
         assert!(!neg_b_ref.is_negative);
+    }
+
+    #[test]
+    fn test_copy_trait() {
+        let original = signed(42, false);  // 42
+        let original_neg = signed(42, true);  // -42
+        
+        // Test that we can copy positive values
+        let copied = original;
+        assert_eq!(original, copied);
+        assert_eq!(original.value.to_imprecise().unwrap(), 42);
+        assert_eq!(copied.value.to_imprecise().unwrap(), 42);
+        assert!(!original.is_negative);
+        assert!(!copied.is_negative);
+        
+        // Test that we can copy negative values
+        let copied_neg = original_neg;
+        assert_eq!(original_neg, copied_neg);
+        assert_eq!(original_neg.value.to_imprecise().unwrap(), 42);
+        assert_eq!(copied_neg.value.to_imprecise().unwrap(), 42);
+        assert!(original_neg.is_negative);
+        assert!(copied_neg.is_negative);
+        
+        // Test that we can use both after copying
+        let sum = original + copied;
+        assert_eq!(sum.value.to_imprecise().unwrap(), 84);
+        assert!(!sum.is_negative);
+        
+        let sum_neg = original_neg + copied_neg;
+        assert_eq!(sum_neg.value.to_imprecise().unwrap(), 84);
+        assert!(sum_neg.is_negative);
     }
 }

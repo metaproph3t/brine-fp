@@ -95,7 +95,7 @@ use core::ops::{Add, Sub, Mul, Div};
 /// This system allows for both extremely high precision and a vast dynamic range,
 /// making [`UnsignedNumeric`] ideal for financial, scientific, or blockchain applications
 /// where `f64` or even `u128` would lose accuracy or overflow.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Copy)]
 pub struct UnsignedNumeric {
     /// Internal value stored as a 192-bit integer, scaled by ONE (10^18).
     pub value: InnerUint,
@@ -862,5 +862,22 @@ mod tests {
         assert!(5u64 == a);
         assert!(b != 5u64);
         assert!(5u64 != b);
+    }
+
+    #[test]
+    fn test_copy_trait() {
+        let original = UnsignedNumeric::new(42);
+        
+        // Test that we can copy the value
+        let copied = original;
+        
+        // Both should still be valid and equal
+        assert_eq!(original, copied);
+        assert_eq!(original.to_imprecise().unwrap(), 42);
+        assert_eq!(copied.to_imprecise().unwrap(), 42);
+        
+        // Test that we can use both after copying
+        let sum = original + copied;
+        assert_eq!(sum.to_imprecise().unwrap(), 84);
     }
 }
